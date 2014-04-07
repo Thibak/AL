@@ -1,0 +1,4 @@
+FN	TN
+Пациент.csv	AL_Pt
+События ОЛ.csv	AL_Ev
+Острые лейкозы.csv	AL_AL
