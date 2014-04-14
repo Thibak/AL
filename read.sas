@@ -16,11 +16,11 @@
 %macro what_OC;
 %if &sysscpl = W32_7PRO %then 
 	%do;
-		%let disk = D; *sony;
+		%let disk = C:\Users\user\Documents\GitHub\AL; *sony;
 	%end;
 %else/*%if &sysscpl = "W32_7PRO" %then */ 
 	%do;
-		%let disk = Z; *остальные;
+		%let disk = Z:\AC\AL; *остальные;
 	%end;
 %mend;
 
@@ -34,13 +34,13 @@
 /*run;*/
 %what_OC;
 
-%let dirURI = &disk.:\AC\AL\CurBase\; * директория с базой;
+%let dirURI = &disk.\CurBase\; * директория с базой;
 %let metaFN = meta.txt; * имя файла метаданных;
 %let LN = AL; * имя библиотеки;
 %let lbs = labels.txt; * файл с лейблами (для всех таблиц в кучу);
 
-Libname &LN "&disk.:\AC\AL\SAS"; * создали файл данных;
-filename tranfile "&disk.:\AC\AL\REG_ARCH_&sysdate9..stc"; * условный идентификатор транспортного файла;
+Libname &LN "&disk.\SAS"; * создали файл данных;
+filename tranfile "&disk.\REG_ARCH_&sysdate9..stc"; * условный идентификатор транспортного файла;
 
 /***********************************************************************************************************/
 /************************************* формат фала метаданных **********************************************/
