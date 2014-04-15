@@ -312,6 +312,9 @@ data regal.PatAllEv;
 run;
 
 %eventan (regal.PatAllEv, TLive, alive, 1,,cl,,,"Общая выживаемость");
+%eventan (regal.PatAllEv, TLive, alive, 1,,cl,new_diag, new_diag_f.,"Общая выживаемость. Стритификация по нозологиям");
+%eventan (regal.PatAllEv, TLive, alive, 1,,cl,center, ,"Общая выживаемость. Стритификация по месту лечения");
+
 /*%eventan (&LN..new_pt, TLive, i_death, 0,,&y,new_normkariotipname,,"Стратификация по кариотипу. Выживаемость");*/
 
 /*
