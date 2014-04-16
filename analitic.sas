@@ -94,6 +94,8 @@ data regal.al_pt;
 	set regal.al_pt;
 	rename
 		contactid = pt_id; 
+	age = floor(yrdif(birthdate, new_diagnosisdate,'AGE'));
+	if age = 0 then age = .;
 run;
 
 data regal.al_ev;
@@ -209,8 +211,8 @@ run;
 data regal.patall; 
 	merge regal.al_al regal.al_pt;  *pat11pat2; 
 	by pt_id; 
-	if new_diagnosisage < 10 then new_diagnosisage=.;
-	if new_lpuname='ФГБУ ГНЦ МЗСЦ РФ' then center='ГНЦ';
+	*if new_diagnosisage < 10 then new_diagnosisage=.;
+	if owneridname='Ахмерзаева Залина Хатаевна' then center='ГНЦ';
 		else center='рег';
 run;
 
@@ -246,7 +248,7 @@ data regal.EvAn;
 	set regal.al_ev; 
 	by pt_id;
 
-	retain dateDeath dateLCont dateRel alive rel;
+	retain dateDeath dateLCont dateRel alive rel inPr bmt;
 	if first.pt_id then do; 
 			dateDeath=.; 
 			dateBMT=.;
@@ -292,6 +294,7 @@ data regal.PatAllEv;
 	by  pt_id; 
 	ip=inp; 
 	ie=ine; 
+	if inPr = . then inPr = 0;
 run;
 
 
@@ -317,6 +320,20 @@ run;
 %eventan (regal.PatAllEv, TLive, alive, 1,,cl,,,"Общая выживаемость");
 %eventan (regal.PatAllEv, TLive, alive, 1,,cl,new_diag, new_diag_f.,"Общая выживаемость. Стритификация по нозологиям");
 %eventan (regal.PatAllEv, TLive, alive, 1,,cl,center, ,"Общая выживаемость. Стритификация по месту лечения");
+
+data a;
+	set regal.PatAllEv;
+	if TLive > 12;
+run;
+
+proc sort data = a;
+	by tlive;
+run;
+
+proc print data = a;
+	var fio tlive owneridname
+;
+run;
 
 /*%eventan (&LN..new_pt, TLive, i_death, 0,,&y,new_normkariotipname,,"Стратификация по кариотипу. Выживаемость");*/
 
@@ -373,7 +390,7 @@ run;
 
 data tmp;
 	set regal.PatAllEv; 
-	if center='рег';
+	if center='рег' and TLive < 15;
 run;
 
 proc sort data = tmp;
@@ -382,7 +399,7 @@ run;
 
 proc means data=tmp N median  min max; 
 	by new_diag;
-	var new_diagnosisage; 
+	var age; 
 	format new_diag new_diag_f.;
 	title "Только по регионам";
 run;
@@ -396,6 +413,59 @@ proc freq data=tmp;
 	by  new_diag;
 	tables inPr*alive / nocum;;
 	format gendercode gendercode_f. inPr inPr_f.  new_diag new_diag_f. alive yn_f.; 
+run;
+
+%eventan (tmp, TLive, alive, 1,,cl,,,"Общая выживаемость (эпид. исследование)");
+%eventan (tmp, TLive, alive, 1,,cl,new_diag, new_diag_f.,"Общая выживаемость. Стритификация по нозологиям");
+
+proc freq data=tmp; 
+	tables ip*ie; 
+run;
+
+proc freq data=tmp; 
+	tables new_patientstat*alive; 
+run;
+
+
+proc freq data=tmp; 
+	tables gendercode; 
+run;
+
+proc sort data = tmp;
+	by tlive;
+run;
+
+proc print data = tmp;
+	var fio tlive owneridname new_diag center  age new_diagnosisage
+
+;
+format new_diag new_diag_f.;
+run;
+
+%eventan (tmp, TLive, alive, 1,,cl,inPr,yn_f.,"ОМЛ. Общая выживаемость. Стратификация по включению в протокол");
+
+data a;
+	set tmp;
+	if new_diag = 1;
+run;
+
+%eventan (a, TLive, alive, 1,,cl,inPr,yn_f.,"ОМЛ. Общая выживаемость. Стратификация по включению в протокол");
+
+data a;
+	set tmp;
+	if new_diag = 2;
+run;
+
+%eventan (a, TLive, alive, 1,,cl,inPr,yn_f.,"ОЛЛ. Общая выживаемость. Стратификация по включению в протокол");
+
+proc sort data = a;
+	by inPr;
+run;
+
+proc print data = a;
+	by inPr;
+	var new_contactname tlive owneridname age ie
+;
 run;
 
 
