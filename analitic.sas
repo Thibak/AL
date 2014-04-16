@@ -246,29 +246,32 @@ data regal.EvAn;
 	set regal.al_ev; 
 	by pt_id;
 
-	retain datdeath datlcont datrel alive rel;
+	retain dateDeath dateLCont dateRel alive rel;
 	if first.pt_id then do; 
-			datdeath=.; 
-			datlcont=.; 
-			datrel=.; 
+			dateDeath=.; 
+			dateBMT=.;
+			dateLCont=.; 
+			dateRel=.; 
 			alive=1; 
 			rel=0;
+			BMT=0;
 			inPr=0;
 		end;
 
-	if new_event=1 then do; inPr=1; end; 	*включеине в каой-либо протокол;
-	if new_event=2 then do; datlcont=new_event_date;  end; 
-	if new_event=4 then do; datrel=new_event_date; rel=1; end; 
-	if new_event=5 then do; datdeath=new_event_date; alive=0; end; 
-	if new_event=6 then do; datlcont=new_event_date;  end; 
+	if new_event=1 then do;                          inPr=1;  end; 	*включеине в каой-либо протокол;
+	if new_event=2 then do; dateLCont=new_event_date;          end; *выбыл из под наблюдения;
+	if new_event=3 then do; dateBMT=new_event_date;  BMT=1;   end; *ТКМ;
+	if new_event=4 then do; dateRel=new_event_date;   rel=1;   end; *рецидив;
+	if new_event=5 then do; dateDeath=new_event_date; alive=0; end; *смерть;
+	if new_event=6 then do; dateLCont=new_event_date;          end; *усппешный контакт с пациентами;
 
 
 	if last.pt_id then output;
 
 	label
-		datdeath='дата смерти' 
-		datlcont='дата п.контакта' 
-		datrel='дата рецидива' 
+		dateDeath='дата смерти' 
+		dateLCont='дата п.контакта' 
+		dateRel='дата рецидива' 
 		alive='жив?' 
 		rel='рецидив?'
 		;
@@ -304,8 +307,8 @@ data regal.PatAllEv;
 	set regal.PatAllEv; 
 
     select (alive);
-        when (0) TLive = (datdeath - new_diagnosisdate)/30;
-        when (1) TLive = (datlcont - new_diagnosisdate)/30;
+        when (0) TLive = (dateDeath - new_diagnosisdate)/30;
+        when (1) TLive = (dateLCont - new_diagnosisdate)/30;
         otherwise;
     end;
 
@@ -339,7 +342,7 @@ ttl - заголовок
 /*run;*/
 /**/
 /*proc print data = regal.PatAllEv;*/
-/*	var TLive FIO datdeath datlcont new_diagnosisdate;*/
+/*	var TLive FIO dateDeath dateLCont new_diagnosisdate;*/
 /*run;*/
 
 
@@ -358,8 +361,8 @@ run;
 
 /*data aa; */
 /*	set regal.PatAllEv; */
-/*	d1=datlcont-new_datelastcontact;*/
-/*	d2=datdeath-new_deathdate;*/
+/*	d1=dateLCont-new_datelastcontact;*/
+/*	d2=dateDeath-new_deathdate;*/
 /*run;*/
 /**/
 /*proc print; */
