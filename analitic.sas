@@ -416,7 +416,13 @@ proc freq data=tmp;
 run;
 
 %eventan (tmp, TLive, alive, 1,,cl,,,"Общая выживаемость (эпид. исследование)");
-%eventan (tmp, TLive, alive, 1,,cl,new_diag, new_diag_f.,"Общая выживаемость. Стритификация по нозологиям");
+
+data tmp_cutoff;
+	set tmp;
+	if new_diag in (1,2);
+run;
+
+%eventan (tmp_cutoff, TLive, alive, 1,,cl,new_diag, new_diag_f.,"Общая выживаемость. Стритификация по нозологиям");
 
 proc freq data=tmp; 
 	tables ip*ie; 
@@ -446,7 +452,16 @@ run;
 
 data a;
 	set tmp;
-	if new_diag = 1;
+	if new_diag = 1; *ОМЛ;
+run;
+
+proc sort data = a;
+	by inPr;
+run;
+
+proc means data = a N median min max;
+	by inPr;
+	var age;
 run;
 
 %eventan (a, TLive, alive, 1,,cl,inPr,yn_f.,"ОМЛ. Общая выживаемость. Стратификация по включению в протокол");
